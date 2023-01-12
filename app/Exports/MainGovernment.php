@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Repositories\AnswerRepository;
+use App\Repositories\AreaRepository;
 use App\Repositories\HealthCareCenterRepository;
 use App\Repositories\QuestionRepository;
 use Maatwebsite\Excel\Concerns\FromArray;
@@ -23,16 +24,19 @@ class MainGovernment implements FromArray
      */
     protected HealthCareCenterRepository $healthCareCenterRepository;
     protected int $type;
+    protected AreaRepository $areaRepository;
 
     public function __construct(
         HealthCareCenterRepository $healthCareCenterRepository,
         QuestionRepository $questionRepository,
         AnswerRepository $answerRepository,
+        AreaRepository $areaRepository,
         int $type
     ) {
         $this->healthCareCenterRepository = $healthCareCenterRepository;
         $this->questionRepository = $questionRepository;
         $this->answerRepository = $answerRepository;
+        $this->areaRepository = $areaRepository;
         $this->type = $type;
     }
 
@@ -63,7 +67,20 @@ class MainGovernment implements FromArray
                             'answer' => $option->key
                         ])->count();
 
-                    $exportArray[] = ['', '', $option->value, $answerForThisHCF];
+                    $areas = $this->areaRepository->all();
+
+                    $areaReport = [];
+
+                    foreach ($areas as $area) {
+                        $areaReport[] = $this->answerRepository->whereHas('healthCareCenter', function ($q) use ($area){
+                                $q->where(['area_id' => $area->id , 'managerial_type' =>  $this->type]);
+                            })->findWhere([
+                                'question_id' => $sectionQuestion->id,
+                                'answer' => $option->key
+                            ])->count();
+                    }
+
+                    $exportArray[] = ['', '', $option->value, $answerForThisHCF, ...$areaReport];
                 }
             }
         }

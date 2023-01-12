@@ -35,6 +35,6 @@ Route::get('/main-report-hospital/{hospital_type}', [AdminController::class, 'ma
 
 Route::get('/main-report-government/{government_type}', [AdminController::class, 'mainReportGovernment']);
 
-Route::get('/main-report-area', [AdminController::class, 'mainReportArea']);
-
 Route::get('/main-report-urban/{urban_type}', [AdminController::class, 'mainReportUrban']);
+
+Route::get('/main-report-area', [AdminController::class, 'mainReportArea']);

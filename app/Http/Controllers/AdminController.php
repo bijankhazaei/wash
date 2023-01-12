@@ -154,6 +154,7 @@ class AdminController extends Controller
                 $this->healthCareCenterRepository,
                 $this->questionRepository,
                 $this->answerRepository,
+                $this->areaRepository,
                 $hospital_type),
             $fileName);
     }
@@ -171,6 +172,7 @@ class AdminController extends Controller
                 $this->healthCareCenterRepository,
                 $this->questionRepository,
                 $this->answerRepository,
+                $this->areaRepository,
                 $government_type),
             $fileName);
     }
@@ -202,6 +204,7 @@ class AdminController extends Controller
                 $this->healthCareCenterRepository,
                 $this->questionRepository,
                 $this->answerRepository,
+                $this->areaRepository,
                 $urban_type),
             $fileName);
     }

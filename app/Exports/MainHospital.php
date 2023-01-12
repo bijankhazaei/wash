@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\HealthCareCenter;
 use App\Repositories\AnswerRepository;
+use App\Repositories\AreaRepository;
 use App\Repositories\HealthCareCenterRepository;
 use App\Repositories\QuestionRepository;
 use Maatwebsite\Excel\Concerns\FromArray;
@@ -24,17 +25,20 @@ class MainHospital implements FromArray
      */
     protected HealthCareCenterRepository $healthCareCenterRepository;
     protected int $type;
+    protected AreaRepository $areaRepository;
 
     public function __construct(
         HealthCareCenterRepository $healthCareCenterRepository,
         QuestionRepository $questionRepository,
         AnswerRepository $answerRepository,
+        AreaRepository $areaRepository,
         int $type
     ) {
         $this->healthCareCenterRepository = $healthCareCenterRepository;
         $this->questionRepository = $questionRepository;
         $this->answerRepository = $answerRepository;
         $this->type = $type;
+        $this->areaRepository = $areaRepository;
     }
 
     /**
@@ -67,7 +71,20 @@ class MainHospital implements FromArray
                             'answer' => $option->key
                         ])->count();
 
-                    $exportArray[] = ['', '', $option->value, $answerForThisHCF];
+                    $areas = $this->areaRepository->all();
+
+                    $areaReport = [];
+
+                    foreach ($areas as $area) {
+                        $areaReport[] = $this->answerRepository->whereHas('healthCareCenter', function ($q) use ($area){
+                            $q->where(['area_id' => $area->id , 'health_care_facility_type' => $this->type]);
+                            })->findWhere([
+                                'question_id' => $sectionQuestion->id,
+                                'answer' => $option->key
+                            ])->count();
+                    }
+
+                    $exportArray[] = ['', '', $option->value, $answerForThisHCF, ...$areaReport];
                 }
             }
         }
